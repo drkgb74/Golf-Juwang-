@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#123c32">
+<title>酒王 GOLF EVENT</title>
+<style>
+:root{--green:#123c32;--green2:#1e5b49;--gold:#d8ad55;--bg:#f4f5f0;--card:#fff;--ink:#17231f;--muted:#68766f;--line:#e1e7e1;--red:#a94438}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif}
+header{background:linear-gradient(135deg,var(--green),#245b48);color:white;padding:24px 18px 22px;border-radius:0 0 24px 24px}
+header .eyebrow{font-size:11px;letter-spacing:2px;opacity:.8}h1{font-size:25px;margin:7px 0 4px}header p{margin:0;color:#d8e5dc;font-size:13px}
+main{max-width:650px;margin:auto;padding:16px 14px 40px}.tabs{display:flex;gap:8px;margin:0 0 14px}.tab{flex:1;border:1px solid var(--line);background:white;border-radius:12px;padding:12px 6px;font-weight:750;color:var(--muted)}.tab.active{background:var(--green);color:white;border-color:var(--green)}
+.panel{display:none}.panel.active{display:block}.card{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:16px;margin:0 0 12px;box-shadow:0 3px 12px #183b2c08}
+h2{font-size:17px;margin:0 0 12px}.hint{font-size:12px;color:var(--muted);line-height:1.55;margin:-5px 0 12px}
+label{display:block;font-size:12px;color:var(--muted);font-weight:700;margin:10px 0 5px}
+input,select{width:100%;min-width:0;border:1px solid #d9e1da;border-radius:10px;padding:12px;font:inherit;font-size:16px;background:#fff;color:var(--ink)}
+.team{border:1px solid var(--line);border-radius:13px;padding:13px;margin:10px 0}.teamhead{display:flex;align-items:center;justify-content:space-between;font-weight:800}.teamhead span:last-child{font-size:11px;color:var(--muted);font-weight:600}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{border:0;border-radius:12px;padding:14px 16px;font-size:15px;font-weight:800;background:var(--green);color:white;width:100%;cursor:pointer}.btn.gold{background:#b7832e}.btn.light{background:#edf3ee;color:var(--green);border:1px solid #d7e3da}.btn.small{width:auto;padding:8px 12px;font-size:12px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.result{background:#f6f2e8;border:1px solid #eadbb9;border-radius:14px;padding:14px;margin:9px 0}.rank{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #e9e1d1}.rank:last-child{border:0}.rank strong{font-size:16px}.score{font-variant-numeric:tabular-nums;font-weight:850;color:var(--green)}
+.hiddenholes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.hole{background:#edf3ee;border-radius:10px;text-align:center;padding:12px 4px;font-weight:850;color:var(--green)}
+.holeinputs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.holeinputs input{padding:10px 6px;text-align:center}
+.note{font-size:11px;color:var(--muted);line-height:1.5}.status{font-size:12px;color:var(--green);margin-top:8px}.footer{text-align:center;color:#89948d;font-size:11px;padding:12px}
+@media(min-width:560px){main{padding-top:22px}.teamgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.team{margin:0}.team:last-child{grid-column:1/-1}}
+</style>
+</head>
+<body>
+<header><div class="eyebrow">GOLF EVENT CALCULATOR</div><h1>酒王 GOLF EVENT 🍻</h1><p>오늘의 주왕을 뽑아라 · 아리아 / 빌리 / 샬롯</p></header>
+<main>
+<div class="tabs"><button class="tab active" data-tab="setup">경기 입력</button><button class="tab" data-tab="a">A 스코어 핸디</button><button class="tab" data-tab="b">B 히든 홀</button></div>
+<section id="setup" class="panel active">
+<div class="card"><h2>대회 정보</h2><label>대회명</label><input id="eventName" value="酒王 골프 이벤트" maxlength="40"><label>라운드 날짜</label><input id="eventDate" type="date"></div>
+<div class="card"><h2>조별 정보 입력</h2><p class="hint">그늘집 주류·안주 결제 합계와 조 평균 18홀 타수를 입력하세요. 평균 타수는 조원들의 18홀 타수 합계를 인원수로 나눈 값입니다.</p>
+<div class="teamgrid" id="teams"></div><div class="status" id="saveStatus">입력 내용은 이 기기에 자동 저장됩니다.</div></div>
+<div class="card"><h2>사용 안내</h2><p class="note">A 방식은 결제금액에 평균 타수 가중치를 적용합니다. B 방식은 무작위 히든 홀 3개를 뽑고, 해당 홀 성적에 따라 보정합니다. 음주량이나 음주 여부를 평가하지 않으며, 결제금액은 이벤트용 지표로만 사용하세요.</p></div>
+</section>
+<section id="a" class="panel">
+<div class="card"><h2>A 방식 · 스코어 핸디캡</h2><p class="hint">평균 타수가 72타일 때 1.00배. 72타보다 높으면 가중치가 커집니다.</p>
+<label>기준 타수</label><input id="abase" type="number" value="72" min="1">
+<label>가중치 조정 폭 (%)</label><input id="afactor" type="number" value="100" min="0" max="500">
+<button class="btn" id="calcA">A 방식 순위 계산</button><div id="resultA"></div></div>
+</section>
+<section id="b" class="panel">
+<div class="card"><h2>B 방식 · 히든 홀 럭키 드로우</h2><p class="hint">시작 전에 18홀 중 3개를 무작위 추첨합니다. 히든 홀에서 버디 이하(파보다 좋은 스코어)는 1회당 20%, 양파 이상은 1회당 30%를 결제금액에 가산합니다. 두 조건은 중복 적용하지 않습니다.</p>
+<button class="btn gold" id="draw">히든 홀 3개 무작위 추첨</button><div id="holes" class="hiddenholes" style="margin-top:12px"><div class="hole">미추첨</div><div class="hole">미추첨</div><div class="hole">미추첨</div></div>
+<div id="binputs"></div>
+<div class="card" style="padding:12px;margin-top:10px"><strong style="font-size:13px">히든 홀 파(Par) 설정</strong><p class="note">추첨된 각 홀의 실제 파를 확인해 선택하세요. 기본값은 파4입니다.</p><div class="holeinputs" id="pars"></div></div>
+<div class="grid2"><div><label>버디 이하 가산율 (%)</label><input id="birdieBonus" type="number" value="20" min="0" max="200"></div><div><label>양파 이상 가산율 (%)</label><input id="doubleBonus" type="number" value="30" min="0" max="200"></div></div>
+<button class="btn" id="calcB" style="margin-top:14px">B 방식 순위 계산</button><div id="resultB"></div>
+</div>
+</section>
+<div class="actions"><button class="btn light" id="export">백업 파일 저장</button><button class="btn light" id="reset">전체 입력 초기화</button></div>
+<div class="footer">酒王 GOLF EVENT · 1.0 · 데이터는 이 기기의 브라우저에 저장됩니다.</div>
+</main>
+<script>
+const names=['아리아 조','빌리 조','샬롯 조'];
+const $=id=>document.getElementById(id);
+const fmt=n=>'₩'+Math.round(n).toLocaleString('ko-KR');
+let hidden=[];
+let holePars={};
+function defaultData(){return {eventName:'酒王 골프 이벤트',eventDate:new Date().toISOString().slice(0,10),teams:names.map(name=>({name,amount:0,avg:90,holes:{}}))}}
+function load(){try{return JSON.parse(localStorage.getItem('juwangData'))||defaultData()}catch{return defaultData()}}
+let data=load();
+function save(){data.eventName=$('eventName').value;data.eventDate=$('eventDate').value;localStorage.setItem('juwangData',JSON.stringify(data));$('saveStatus').textContent='✓ 이 기기에 자동 저장됨';}
+function renderTeams(){
+$('teams').innerHTML=data.teams.map((t,i)=>`<div class="team"><div class="teamhead"><span>${t.name}</span><span>TEAM ${i+1}</span></div><label>그늘집 총 결제금액 (원)</label><input inputmode="numeric" type="number" min="0" id="amount${i}" value="${t.amount||''}" placeholder="예: 125000"><label>조 평균 18홀 타수</label><input inputmode="decimal" type="number" min="40" max="180" step=".1" id="avg${i}" value="${t.avg??90}"></div>`).join('');
+data.teams.forEach((t,i)=>{['amount','avg'].forEach(k=>$(`${k}${i}`).addEventListener('input',()=>{t[k]=Number($(`${k}${i}`).value)||0;save()}))});
+}
+function ranking(target,rows,title,method){
+target.innerHTML=`<div class="result"><strong>${title}</strong>${rows.map((r,i)=>`<div class="rank"><div><strong>${i===0?'🏆 ':''}${i+1}위 ${r.name}</strong><div class="note">${r.detail}</div></div><div class="score">${fmt(r.score)}</div></div>`).join('')}<p class="note">계산 결과는 이벤트용 가중 점수입니다. 실제 결제액이나 음주량 순위가 아닙니다.</p></div>`;
+}
+function calcA(){
+const base=Number($('abase').value)||72, factor=(Number($('afactor').value)||0)/100;
+const rows=data.teams.map(t=>{const weight=Math.max(0,1+((t.avg-base)/100)*factor);return{name:t.name,score:t.amount*weight,detail:`결제 ${fmt(t.amount)} × 가중치 ${weight.toFixed(3)} (${t.avg}타)`}}).sort((a,b)=>b.score-a.score);
+ranking($('resultA'),rows,'A 방식 최종 순위','A');
+}
+function draw(){const pool=Array.from({length:18},(_,i)=>i+1);hidden=[];while(hidden.length<3){const ix=Math.floor(Math.random()*pool.length);hidden.push(pool.splice(ix,1)[0])}hidden.sort((a,b)=>a-b);holePars={};hidden.forEach(h=>holePars[h]=4);$('holes').innerHTML=hidden.map(h=>`<div class="hole">HIDDEN<br>HOLE ${h}</div>`).join('');renderBInputs();renderPars();save()}
+function renderBInputs(){
+if(!hidden.length){$('binputs').innerHTML='<p class="note">먼저 히든 홀을 추첨하세요.</p>';return}
+$('binputs').innerHTML=data.teams.map((t,i)=>`<div class="team"><div class="teamhead"><span>${t.name}</span><span>히든 홀 스코어</span></div><div class="holeinputs">${hidden.map(h=>`<div><label>${h}번 홀</label><input type="number" min="1" max="20" inputmode="numeric" id="h${i}_${h}" value="${t.holes[h]??''}" placeholder="타수"></div>`).join('')}</div></div>`).join('');
+data.teams.forEach((t,i)=>hidden.forEach(h=>$(`h${i}_${h}`).addEventListener('input',()=>{t.holes[h]=Number($(`h${i}_${h}`).value)||null;save()})));
+}
+function renderPars(){
+if(!hidden.length){$('pars').innerHTML='';return}
+$('pars').innerHTML=hidden.map(h=>`<div><label>${h}번 홀 파</label><select id="par${h}"><option value="3">파3</option><option value="4" selected>파4</option><option value="5">파5</option></select></div>`).join('');
+hidden.forEach(h=>$('par'+h).addEventListener('change',()=>{holePars[h]=Number($('par'+h).value)}));
+}
+function calcB(){
+if(hidden.length!==3){alert('먼저 히든 홀 3개를 추첨하세요.');return}
+const bird=(Number($('birdieBonus').value)||0)/100,double=(Number($('doubleBonus').value)||0)/100;
+const rows=data.teams.map(t=>{let b=0,d=0,missing=0;hidden.forEach(h=>{const s=Number(t.holes[h]);if(!s){missing++;return}const par=holePars[h]||4;if(s<par)b++;else if(s>=par*2)d++});const weight=1+b*bird+d*double;return{name:t.name,score:t.amount*weight,detail:`버디 이하 ${b}회 · 양파 이상 ${d}회 · 가중치 ${weight.toFixed(2)}${missing?' · 미입력 '+missing+'홀':''}`}}).sort((a,b)=>b.score-a.score);
+if(rows.some(r=>r.detail.includes('미입력'))) {if(!confirm('아직 입력하지 않은 히든 홀 스코어가 있습니다. 입력된 값만으로 계산할까요?'))return}
+ranking($('resultB'),rows,'B 방식 최종 순위','B');
+}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab,.panel').forEach(x=>x.classList.remove('active'));b.classList.add('active');$(b.dataset.tab).classList.add('active')}));
+$('eventName').value=data.eventName;$('eventDate').value=data.eventDate;$('eventName').addEventListener('input',save);$('eventDate').addEventListener('change',save);
+$('calcA').onclick=calcA;$('draw').onclick=draw;$('calcB').onclick=calcB;
+$('reset').onclick=()=>{if(confirm('저장된 경기 데이터를 모두 지울까요?')){localStorage.removeItem('juwangData');data=defaultData();hidden=[];holePars={};location.reload()}};
+$('export').onclick=()=>{save();const blob=new Blob([JSON.stringify({data,hidden},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='juwang-golf-backup.json';a.click();URL.revokeObjectURL(a.href)};
+renderTeams();
+if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+</script>
+</body></html>
