@@ -21,11 +21,11 @@ input,select{width:100%;min-width:0;border:1px solid #d9e1da;border-radius:10px;
 .hiddenholes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.hole{background:#edf3ee;border-radius:10px;text-align:center;padding:12px 4px;font-weight:850;color:var(--green)}
 .holeinputs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.holeinputs input{padding:10px 6px;text-align:center}
 .note{font-size:11px;color:var(--muted);line-height:1.5}.status{font-size:12px;color:var(--green);margin-top:8px}.footer{text-align:center;color:#89948d;font-size:11px;padding:12px}
-@media(min-width:560px){main{padding-top:22px}.teamgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.team{margin:0}.team:last-child{grid-column:1/-1}}
+@media(min-width:560px){main{padding-top:22px}.teamgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.team{margin:0}}
 </style>
 </head>
 <body>
-<header><div class="eyebrow">GOLF EVENT CALCULATOR</div><h1>酒王 GOLF EVENT 🍻</h1><p>오늘의 주왕을 뽑아라 · 아리아 / 빌리 / 샬롯</p></header>
+<header><div class="eyebrow">GOLF EVENT CALCULATOR</div><h1>酒王 GOLF EVENT 🍻</h1><p>오늘의 주왕을 뽑아라 · 1조 ~ 7조</p></header>
 <main>
 <div class="tabs"><button class="tab active" data-tab="setup">경기 입력</button><button class="tab" data-tab="a">A 스코어 핸디</button><button class="tab" data-tab="b">B 히든 홀</button></div>
 <section id="setup" class="panel active">
@@ -53,15 +53,23 @@ input,select{width:100%;min-width:0;border:1px solid #d9e1da;border-radius:10px;
 <div class="footer">酒王 GOLF EVENT · 1.0 · 데이터는 이 기기의 브라우저에 저장됩니다.</div>
 </main>
 <script>
-const names=['아리아 조','빌리 조','샬롯 조'];
+const names=['1조','2조','3조','4조','5조','6조','7조'];
 const $=id=>document.getElementById(id);
 const fmt=n=>'₩'+Math.round(n).toLocaleString('ko-KR');
 let hidden=[];
 let holePars={};
 function defaultData(){return {eventName:'酒王 골프 이벤트',eventDate:new Date().toISOString().slice(0,10),teams:names.map(name=>({name,amount:0,avg:90,holes:{}}))}}
-function load(){try{return JSON.parse(localStorage.getItem('juwangData'))||defaultData()}catch{return defaultData()}}
+function load(){
+  try{
+    const loaded = JSON.parse(localStorage.getItem('juwangData_v7'));
+    if(loaded && loaded.teams && loaded.teams.length === 7) return loaded;
+    return defaultData();
+  }catch{
+    return defaultData();
+  }
+}
 let data=load();
-function save(){data.eventName=$('eventName').value;data.eventDate=$('eventDate').value;localStorage.setItem('juwangData',JSON.stringify(data));$('saveStatus').textContent='✓ 이 기기에 자동 저장됨';}
+function save(){data.eventName=$('eventName').value;data.eventDate=$('eventDate').value;localStorage.setItem('juwangData_v7',JSON.stringify(data));$('saveStatus').textContent='✓ 이 기기에 자동 저장됨';}
 function renderTeams(){
 $('teams').innerHTML=data.teams.map((t,i)=>`<div class="team"><div class="teamhead"><span>${t.name}</span><span>TEAM ${i+1}</span></div><label>그늘집 총 결제금액 (원)</label><input inputmode="numeric" type="number" min="0" id="amount${i}" value="${t.amount||''}" placeholder="예: 125000"><label>조 평균 18홀 타수</label><input inputmode="decimal" type="number" min="40" max="180" step=".1" id="avg${i}" value="${t.avg??90}"></div>`).join('');
 data.teams.forEach((t,i)=>{['amount','avg'].forEach(k=>$(`${k}${i}`).addEventListener('input',()=>{t[k]=Number($(`${k}${i}`).value)||0;save()}))});
@@ -95,7 +103,7 @@ ranking($('resultB'),rows,'B 방식 최종 순위','B');
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab,.panel').forEach(x=>x.classList.remove('active'));b.classList.add('active');$(b.dataset.tab).classList.add('active')}));
 $('eventName').value=data.eventName;$('eventDate').value=data.eventDate;$('eventName').addEventListener('input',save);$('eventDate').addEventListener('change',save);
 $('calcA').onclick=calcA;$('draw').onclick=draw;$('calcB').onclick=calcB;
-$('reset').onclick=()=>{if(confirm('저장된 경기 데이터를 모두 지울까요?')){localStorage.removeItem('juwangData');data=defaultData();hidden=[];holePars={};location.reload()}};
+$('reset').onclick=()=>{if(confirm('저장된 경기 데이터를 모두 지울까요?')){localStorage.removeItem('juwangData_v7');data=defaultData();hidden=[];holePars={};location.reload()}};
 $('export').onclick=()=>{save();const blob=new Blob([JSON.stringify({data,hidden},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='juwang-golf-backup.json';a.click();URL.revokeObjectURL(a.href)};
 renderTeams();
 if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
